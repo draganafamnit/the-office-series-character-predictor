@@ -14,7 +14,7 @@ https://www.kaggle.com/datasets/fabriziocominetti/the-office-lines
 
 
 ## How to Run
-Clone the repo, install requirements and run scripts
+Create new virtual environment, clone the repo, install requirements and run scripts
 ```bash
 git clone https://github.com/draganafamnit/the-office-series-character-predictor.git
 pip install -r requirements.txt
