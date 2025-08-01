@@ -1,0 +1,10 @@
+pandas  # Data manipulation and analysis
+numpy  # Numerical operations
+scikit-learn  # Machine learning models (SVM, MLP) and metrics
+nltk # Natural language processing for text cleaning
+contractions # Expanding contractions in text
+textblob # Sentiment analysis and text processing
+seaborn # Visualization of confusion matrices
+matplotlib  # Plotting support
+torch # PyTorch for deep learning 
+torchvision # PyTorch utilities 
