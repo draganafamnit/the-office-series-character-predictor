@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dragana Milenković (89231072)">
+<meta name="dcterms.date" content="2025-08-02">
+
+<title>Machine Learning Project Report: Character Prediction from Quotes in The Office</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="Project_Report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Project_Report_files/libs/quarto-html/quarto.js"></script>
+<script src="Project_Report_files/libs/quarto-html/popper.min.js"></script>
+<script src="Project_Report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Project_Report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Project_Report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Project_Report_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Project_Report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Project_Report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Project_Report_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#project-summary-description-and-goals" id="toc-project-summary-description-and-goals" class="nav-link active" data-scroll-target="#project-summary-description-and-goals">Project Summary: Description and Goals</a></li>
+  <li><a href="#backround" id="toc-backround" class="nav-link" data-scroll-target="#backround">Backround</a></li>
+  <li><a href="#dataset-exploration" id="toc-dataset-exploration" class="nav-link" data-scroll-target="#dataset-exploration">Dataset Exploration</a>
+  <ul class="collapse">
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation">Interpretation</a></li>
+  </ul></li>
+  <li><a href="#data-preprocessing" id="toc-data-preprocessing" class="nav-link" data-scroll-target="#data-preprocessing">Data Preprocessing</a>
+  <ul class="collapse">
+  <li><a href="#filtering-the-dataset" id="toc-filtering-the-dataset" class="nav-link" data-scroll-target="#filtering-the-dataset">Filtering the Dataset</a></li>
+  <li><a href="#text-cleaning" id="toc-text-cleaning" class="nav-link" data-scroll-target="#text-cleaning">Text Cleaning</a></li>
+  <li><a href="#feature-extraction-tf-idf-vectorization-for-lr-and-nb" id="toc-feature-extraction-tf-idf-vectorization-for-lr-and-nb" class="nav-link" data-scroll-target="#feature-extraction-tf-idf-vectorization-for-lr-and-nb">Feature Extraction: TF-IDF Vectorization (for LR and NB)</a></li>
+  <li><a href="#potential-additional-features" id="toc-potential-additional-features" class="nav-link" data-scroll-target="#potential-additional-features">Potential Additional Features</a></li>
+  <li><a href="#saved-files" id="toc-saved-files" class="nav-link" data-scroll-target="#saved-files">Saved Files</a></li>
+  </ul></li>
+  <li><a href="#training-model-summaries-and-analysis" id="toc-training-model-summaries-and-analysis" class="nav-link" data-scroll-target="#training-model-summaries-and-analysis">Training: Model Summaries and Analysis</a>
+  <ul class="collapse">
+  <li><a href="#model-selection-strategy-and-computational-constraints" id="toc-model-selection-strategy-and-computational-constraints" class="nav-link" data-scroll-target="#model-selection-strategy-and-computational-constraints">Model Selection Strategy and Computational Constraints</a></li>
+  <li><a href="#model-training-and-hyperparameter-optimization" id="toc-model-training-and-hyperparameter-optimization" class="nav-link" data-scroll-target="#model-training-and-hyperparameter-optimization">Model Training and Hyperparameter Optimization</a></li>
+  <li><a href="#parameter-descriptions" id="toc-parameter-descriptions" class="nav-link" data-scroll-target="#parameter-descriptions">Parameter Descriptions</a></li>
+  <li><a href="#what-are-the-best-parameters" id="toc-what-are-the-best-parameters" class="nav-link" data-scroll-target="#what-are-the-best-parameters">What Are the “Best Parameters”</a></li>
+  <li><a href="#logistic-regression-lr" id="toc-logistic-regression-lr" class="nav-link" data-scroll-target="#logistic-regression-lr">Logistic Regression (LR)</a></li>
+  <li><a href="#multinomial-naive-bayes-nb" id="toc-multinomial-naive-bayes-nb" class="nav-link" data-scroll-target="#multinomial-naive-bayes-nb">Multinomial Naive Bayes (NB)</a></li>
+  <li><a href="#random-fores-rf" id="toc-random-fores-rf" class="nav-link" data-scroll-target="#random-fores-rf">Random Fores (RF)</a></li>
+  <li><a href="#final-comparison-table" id="toc-final-comparison-table" class="nav-link" data-scroll-target="#final-comparison-table">Final Comparison Table</a></li>
+  <li><a href="#why-is-logistic-regression-the-best-model" id="toc-why-is-logistic-regression-the-best-model" class="nav-link" data-scroll-target="#why-is-logistic-regression-the-best-model">Why is Logistic Regression the Best Model?</a></li>
+  <li><a href="#potential-improvements" id="toc-potential-improvements" class="nav-link" data-scroll-target="#potential-improvements">Potential Improvements</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a></li>
+  <li><a href="#literature" id="toc-literature" class="nav-link" data-scroll-target="#literature">Literature</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Machine Learning Project Report: Character Prediction from Quotes in <em>The Office</em></h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Dragana Milenković (89231072) </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            University of Primorska, The Faculty of Mathematics, Natural Sciences and Information Technologies
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 2, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="project-summary-description-and-goals" class="level2">
+<h2 class="anchored" data-anchor-id="project-summary-description-and-goals">Project Summary: Description and Goals</h2>
+<p>This project aims to develop a machine learning model capable of predicting which character from the TV show <em>The Office</em> is most likely to have said a given line. The dataset used is <a href="https://www.kaggle.com/datasets/fabriziocominetti/the-office-lines"><strong>The Office Lines</strong></a> from Kaggle, which includes over 50,000 dialogue lines, each annotated with the character, season, and episode number.</p>
+<p>The primary goal is to apply <strong>natural language processing (NLP)</strong> techniques to classify quotes by character, focusing on the most frequently occurring characters - those responsible for at least 1.6% of the total lines. To achieve this, the project investigates and compares several classification models, including <strong>Logistic Regression, Multinomial Naive Bayes</strong>, and <strong>Random Forest</strong>. While modern deep learning models like DistilBERT are well-suited for informal and contextual language, they were excluded due to hardware limitations.</p>
+<p>In the final stage, the best-performing model is deployed through an interactive command-line interface, allowing users to input a sentence and receive a predicted character. All development steps -including data exploration, preprocessing, modeling, and evaluation - are documented for transparency and reproducibility on publicly available GitHub repository:</p>
+<p><a href="https://github.com/draganafamnit/the-office-series-character-predictor/tree/main">https://github.com/draganafamnit/the-office-series-character-predictor</a></p>
+</section>
+<section id="backround" class="level2">
+<h2 class="anchored" data-anchor-id="backround">Backround</h2>
+<p><em>The Office</em> is a widely acclaimed American sitcom known for its diverse cast and distinctive dialogue. Each character displays unique speech patterns, making the show a rich source for dialogue-based text classification tasks. The availability of an extensive dataset provides a robust foundation for training machine learning models.</p>
+<p>Previous work in NLP has shown that classical models like <strong>Naive Bayes</strong> and <strong>Logistic Regression</strong> - especially when paired with <strong>TF-IDF vectorization</strong> - perform well in dialogue classification tasks. However, the presence of <strong>slang, sarcasm, inside jokes, and short utterances</strong> introduces complexity. Pretrained transformer-based models like <strong>DistilBERT</strong> can potentially address these issues by capturing semantic context, but they are computationally demanding.</p>
+<p>This project builds on classical NLP methods while addressing known challenges such as <strong>data imbalance</strong>. Characters like Michael Scott appear far more frequently than others, which necessitates techniques like <strong>balanced accuracy scoring</strong> and <strong>class weighting</strong>. The project’s focus remains on building interpretable, lightweight models suited to the available hardware, while thoroughly evaluating their performance through confusion matrices, per-class metrics, and overall accuracy.</p>
+</section>
+<section id="dataset-exploration" class="level2">
+<h2 class="anchored" data-anchor-id="dataset-exploration">Dataset Exploration</h2>
+<p>The dataset used in this project, <code>"the-office-lines.csv"</code>, contains dialogue lines tagged with speaker names, seasons, and episodes. Early exploration aimed to understand the structure of the data, the quality of the text, and the distribution of speaker labels to inform downstream modeling decisions.</p>
+<p>Key findings:</p>
+<ul>
+<li><p><strong>Total unique characters:</strong> 780</p></li>
+<li><p><strong>Top 5 characters by number of lines:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 15%">
+<col style="width: 17%">
+<col style="width: 36%">
+<col style="width: 17%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Character</th>
+<th>Number of Lines</th>
+<th>% of Total Lines</th>
+<th>Top 5 Words</th>
+<th>Average Sentiment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Michael</td>
+<td>11,806</td>
+<td>20.11%</td>
+<td>‘okay’, ‘know’, ‘oh’, ‘just’, ‘dont’</td>
+<td>0.10</td>
+</tr>
+<tr class="even">
+<td>Dwight</td>
+<td>7,393</td>
+<td>12.59%</td>
+<td>‘oh’, ‘im’, ‘jim’, ‘michael’, ‘dont’</td>
+<td>0.07</td>
+</tr>
+<tr class="odd">
+<td>Jim</td>
+<td>6,666</td>
+<td>11.35%</td>
+<td>‘oh’, ‘just’, ‘yeah’, ‘okay’, ‘right’</td>
+<td>0.10</td>
+</tr>
+<tr class="even">
+<td>Pam</td>
+<td>5,264</td>
+<td>8.96%</td>
+<td>‘oh’, ‘yeah’, ‘michael’, ‘just’, ‘okay’</td>
+<td>0.09</td>
+</tr>
+<tr class="odd">
+<td>Andy</td>
+<td>3,933</td>
+<td>6.70%</td>
+<td>‘yeah’, ‘im’, ‘like’, ‘just’, ‘know’</td>
+<td>0.07</td>
+</tr>
+</tbody>
+</table></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-1712018095.png" class="img-fluid figure-img" width="369"></p>
+<figcaption>Picture 1. Pie chart: Percentage of lines for Top 13 Characters</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-3070306307.png" class="img-fluid figure-img" width="440"></p>
+<figcaption>Picture 2. Bar plot: Number of lines for Top 13 Characters</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-2711219128.png" class="img-fluid figure-img" width="431"></p>
+<figcaption>Picture 3. Box Plot: Sentiment Distribution for Top 13 Characters</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-873878141.png" class="img-fluid figure-img" width="505"></p>
+<figcaption>Picture 4. Histogram: Overall Sentiment Distribution</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-1978761104.png" class="img-fluid figure-img" width="472"></p>
+<figcaption>Picture 5. Histogram: Line Length Distribution (Word Count)</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-1358906209.png" class="img-fluid figure-img" width="471"></p>
+<figcaption>Picture 6. Bar Chart: Average Word Count per Line</figcaption>
+</figure>
+</div>
+<section id="interpretation" class="level3">
+<h3 class="anchored" data-anchor-id="interpretation">Interpretation</h3>
+<p>These analyses revealed a heavily <strong>imbalanced dataset</strong>, with Michael, Dwight, Jim, Pam, and Andy accounting for a significant portion of the lines. Many of the remaining 775 characters contribute fewer than 1% of total lines each. To address this imbalance while retaining representative dialogue diversity, a <strong>dynamic cutoff</strong> was applied: characters with at least <strong>1.6% of the total lines</strong> were retained, yielding 12 characters in total. This subset covers approximately <strong>79% of all lines</strong>, striking a balance between reducing noise and maintaining useful variation.</p>
+</section>
+</section>
+<section id="data-preprocessing" class="level2">
+<h2 class="anchored" data-anchor-id="data-preprocessing">Data Preprocessing</h2>
+<p>The preprocessing phase focused on cleaning the text data, reducing class imbalance, and engineering features suitable for the selected models.</p>
+<section id="filtering-the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="filtering-the-dataset">Filtering the Dataset</h3>
+<p>To reduce label noise and ensure each class had sufficient representation for training, the dataset was filtered to include only characters with at least 1.6% of the total dialogue lines. This threshold was calculated programmatically using:</p>
+<p><code>character_counts[character_counts / total_lines &gt;= threshold]</code></p>
+<p>This approach allowed for a more balanced multi-class classification task by removing extremely underrepresented speakers that could otherwise distort model training.</p>
+</section>
+<section id="text-cleaning" class="level3">
+<h3 class="anchored" data-anchor-id="text-cleaning">Text Cleaning</h3>
+<p>All dialogue lines were standardized using the following function:</p>
+<p><code>def clean_text(text):</code></p>
+<p><code>text = text.lower()</code></p>
+<p><code>text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation</code></p>
+<p><code>text = re.sub(r'\s+', ' ', text).strip()  # Remove extra whitespace</code></p>
+<p><code>return text</code></p>
+<p>This step involved:</p>
+<ul>
+<li><p><strong>Lowercasing</strong>: ensuring uniformity</p></li>
+<li><p><strong>Punctuation removal:</strong> simplifying vocabulary</p></li>
+<li><p><strong>Whitespace normalization:</strong> improving token consistency</p></li>
+</ul>
+<p>These cleaning steps are essential for reducing vocabulary sparsity and improving feature quality.</p>
+</section>
+<section id="feature-extraction-tf-idf-vectorization-for-lr-and-nb" class="level3">
+<h3 class="anchored" data-anchor-id="feature-extraction-tf-idf-vectorization-for-lr-and-nb">Feature Extraction: TF-IDF Vectorization (for LR and NB)</h3>
+<p>The cleaned dialogue lines were transformed into numerical feature vectors using TF-IDF:</p>
+<p><code>vectorizer = TfidfVectorizer(</code></p>
+<p><code>stop_words='english', # Removes common, low-value words</code></p>
+<p><code>max_features=5000, # Limits the vocabulary to the most informative terms</code></p>
+<p><code>min_df=5, # Filters out rare terms</code></p>
+<p><code>ngram_range=(1, 2)) # Includes both single words and common two-word phrases</code></p>
+</section>
+<section id="potential-additional-features" class="level3">
+<h3 class="anchored" data-anchor-id="potential-additional-features">Potential Additional Features</h3>
+<p>For Random Forest, TF-IDF’s high dimensionality posed a risk of overfitting. Therefore, a dense, semantically meaningful representation could have been used by averaging <strong>100-dimensional GloVe vectors</strong> (<code>glove-wiki-gigaword-100</code>) per line. This method preserves semantic relationships between words in a compact form.</p>
+<p>Two stylistic features could have also been added to both the TF-IDF and GloVe representations:</p>
+<ul>
+<li><p><strong>Line Length</strong>: Number of words per line, reflecting character speech habits.</p></li>
+<li><p><strong>Sentiment Polarity</strong>: Computed using TextBlob, capturing tone or mood of each line.</p></li>
+</ul>
+<p>These features enrich the model input with non-lexical patterns that differ between characters (e.g.&nbsp;Angela’s negativity, Jim’s brevity).</p>
+</section>
+<section id="saved-files" class="level3">
+<h3 class="anchored" data-anchor-id="saved-files">Saved Files</h3>
+<p>To ensure reproducibility and memory efficiency, the following preprocessed data files were saved:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 66%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>X_preprocessed.csv</code></td>
+<td>Sparse matrix of TF-IDF features (for LR/NB)</td>
+</tr>
+<tr class="even">
+<td><code>Y_preprocessed.csv</code></td>
+<td>Label vector with corresponding character classes</td>
+</tr>
+<tr class="odd">
+<td><code>vectorizer.pkl</code></td>
+<td>Saved <code>TfidfVectorizer</code> for consistent transformation of new data</td>
+</tr>
+</tbody>
+</table>
+<p>These assets allow seamless loading of preprocessed data during model training, evaluation, and deployment, without re-running the full pipeline.</p>
+</section>
+</section>
+<section id="training-model-summaries-and-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="training-model-summaries-and-analysis">Training: Model Summaries and Analysis</h2>
+<section id="model-selection-strategy-and-computational-constraints" class="level3">
+<h3 class="anchored" data-anchor-id="model-selection-strategy-and-computational-constraints">Model Selection Strategy and Computational Constraints</h3>
+<p>Due to hardware constraints, I prioritized models whose training could be realistically executed on my machine. Initially, I was intrigued by advanced models like <strong>DistilBERT</strong>, a lightweight transformer well-suited for natural language tasks, and other deep learning techniques. However, due to computational limitations, I shifted focus to more <strong>efficient, traditional machine learning models</strong> that could perform well with the given data and still be tractable for CPU-based training.</p>
+<p>The core of this analysis centers on three models:</p>
+<p><strong>Logistic Regression (LR)</strong>: a linear classification model that predicts class probabilities using a logistic function. It models the relationship between input features (e.g.&nbsp;TF-IDF vectors of text) and class labels (e.g.&nbsp;characters) by fitting a linear decision boundary, optimized using the <em>saga</em> solver with elasticnet regularization (combining L1 and L2 penalties). In this case, it uses class weights to handle imbalanced data.</p>
+<p><strong>Why is it used?</strong> LR is computationally lightweight. It excels with high-dimensional, sparse text data (TF-IDF features), effectively capturing linear relationships in word usage patterns for speaker identification. Elasticnet (l1_ratio=0.1, C=1.0) balances feature selection and model complexity, reducing overfitting on correlated text features, which is critical for NL tasks with overlapping dialogue patterns. Class weights address imbalance, improving predictions for minority classes, though challenges remain (e.g.&nbsp;low recall for Ryan). Its test balanced accuracy (0.2045) makes it the best performer for this task.</p>
+<p><strong>Multinomial Naive Bayes (NB)</strong>: a probabilistic classifier designed for discrete, non-negative features like word counts or TF-IDF vectors. It assumes feature independence (e.g., words in a sentence are independent) and uses a smoothing parameter (alpha) to handle zero probabilities. For example, alpha=0.1 indicates minimal smoothing.</p>
+<p><strong>Why is it used?</strong> NB is extremely fast to train and predict, making it suitable where computational resources are limited. It is a standard choice for text tasks due to its ability to model word frequencies, which can capture speaker-specific keywords (e.g.&nbsp;Michael’s frequent phrases).</p>
+<p>NB was included to demonstrate a baseline model, highlighting the trade-off between speed and performance in NL tasks with imbalanced data.</p>
+<p><strong>Random Forest (RF)</strong>: an ensemble classifier that combines multiple decision trees, each trained on random subsets of data and features. It captures non-linear patterns, configured to balance depth, leaf size, and computational load. Class weights mitigate imbalance.</p>
+<p><strong>Why is it used?</strong> RF captures complex, non-linear patterns in text data, potentially identifying subtle speaker-specific linguistic cues that linear models like LR might miss. The ensemble approach (200 trees) reduces overfitting, and parameters like min_samples_leaf=2 ensure robust nodes, improving generalization in NL tasks.</p>
+</section>
+<section id="model-training-and-hyperparameter-optimization" class="level3">
+<h3 class="anchored" data-anchor-id="model-training-and-hyperparameter-optimization">Model Training and Hyperparameter Optimization</h3>
+<p>The models were trained on preprocessed data from <code>X_preprocessed.npz</code> and <code>Y_preprocessed.csv.gz</code>, validated for consistency, and split into training (80%) and test (20%) sets using stratified sampling to maintain the class distribution.</p>
+<p>To address class imbalance, class weights were computed using <code>compute_class_weight("balanced")</code>. Hyperparameter tuning was conducted using <code>RandomizedSearchCV</code> with <strong>5-fold stratified cross-validation</strong>, using <strong>balanced accuracy</strong> as the scoring metris. This ensures that all classes are equally considered, even if some are underrepresented.</p>
+<p>Each model was tested on a small grid of hyperparameters (up to 10 combinations) to keep training feasible. Performance was evaluated on a hold-out test set, and the best model was selected and saved using <code>joblib</code>.</p>
+</section>
+<section id="parameter-descriptions" class="level3">
+<h3 class="anchored" data-anchor-id="parameter-descriptions">Parameter Descriptions</h3>
+<p><strong>CV Balanced Accuracy</strong>: The average balanced accuracy across 5-fold stratified cross-validation on the training set. Balanced accuracy averages the recall (true positive rate) for each class, accounting for class imbalance. It reflects model performance during hyperparameter tuning.</p>
+<p><strong>Test Balanced Accuracy</strong>: The balanced accuracy on the hold-out test set (20% of data), calculated as the average recall across all classes. It measures the final model’s ability to generalize to unseen data, critical for imbalanced NL tasks.</p>
+<p><strong>Macro F1-Score</strong>: The unweighted average of F1-scores (harmonic mean of precision and recall) across all classes. It treats all classes equally, highlighting performance on minority classes, important for balanced NL exploration.</p>
+<p><strong>Weighted Accuracy</strong>: The overall accuracy (correct predictions divided by total samples) weighted by class support. It reflects performance skewed toward frequent classes, less informative for imbalanced data.</p>
+<p><strong>Precision Highlights</strong>: Key precision values for specific classes, showing the proportion of correct positive predictions. High precision for frequent classes but low for minority classes indicates model bias in NL tasks.</p>
+<p><strong>Confusion Matrix</strong>: A table showing true vs.&nbsp;predicted labels for each class. It visualizes misclassifications, crucial for understanding model strengths and weaknesses in distinguishing speakers.</p>
+</section>
+<section id="what-are-the-best-parameters" class="level3">
+<h3 class="anchored" data-anchor-id="what-are-the-best-parameters">What Are the “Best Parameters”</h3>
+<p>In each model’s training summary, the <strong>“best parameters”</strong> refer to the combination of hyperparameters that achieved the <strong>highest balanced accuracy</strong> during cross-validation on the training data. These parameters were identified via <code>RandomizedSearchCV</code> and are used to retrain the model before final evaluation on the test set.</p>
+</section>
+<section id="logistic-regression-lr" class="level3">
+<h3 class="anchored" data-anchor-id="logistic-regression-lr">Logistic Regression (LR)</h3>
+<p><strong>Model Type</strong>: Linear classifier using the <code>saga</code> solver (supports elasticnet regularization).</p>
+<p><strong>Best Params:</strong> <code>{'penalty': 'elasticnet', 'l1_ratio': 0.1, 'C': 1.0}</code></p>
+<p><strong>Results:</strong></p>
+<ul>
+<li><p><strong>CV Balanced Accuracy</strong>: 0.1975</p></li>
+<li><p><strong>Test Balanced Accuracy</strong>: 0.2045</p></li>
+<li><p><strong>Macro F1-score</strong>: 0.17</p></li>
+<li><p><strong>Weighted Accuracy</strong>: 0.20</p></li>
+<li><p><strong>Precision highlights</strong>:</p>
+<ul>
+<li><p>Michael: 0.45 (but recall only 0.18)</p></li>
+<li><p>Dwight &amp; Jim: moderately stable performance</p></li>
+<li><p>Angela, Darryl, Kevin: decent recall, low precision</p></li>
+</ul></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/confusion_matrix_LR_20250731_160926-01.png" class="img-fluid figure-img"></p>
+<figcaption>Picture 7. Confusion Matrix LR</figcaption>
+</figure>
+</div>
+<p>Strong performance for Michael (427 true positives) and Dwight (400), with balanced predictions for Andy (137) and Kevin (192). High off-diagonal values (e.g.&nbsp;Jim misclassified as Michael: 231) indicate challenges with minority classes.</p>
+<p><strong>Analysis:</strong></p>
+<ul>
+<li><p><strong>Strengths</strong>: Logistic Regression was the <strong>best-performing model</strong>, likely due to its regularization flexibility (elasticnet handles correlated features).</p></li>
+<li><p><strong>Weaknesses</strong>: Still struggles with <strong>recall</strong>, suggesting many false negatives, likely due to imbalance.</p></li>
+</ul>
+</section>
+<section id="multinomial-naive-bayes-nb" class="level3">
+<h3 class="anchored" data-anchor-id="multinomial-naive-bayes-nb">Multinomial Naive Bayes (NB)</h3>
+<p><strong>Model Type</strong>: Probabilistic classifier based on word frequency (suitable for text classification).</p>
+<p><strong>Best Params:</strong> <code>{'alpha': 0.1}</code></p>
+<p><strong>Results:</strong></p>
+<ul>
+<li><p><strong>CV Balanced Accuracy</strong>: 0.1402</p></li>
+<li><p><strong>Test Balanced Accuracy</strong>: 0.1414</p></li>
+<li><p><strong>Macro F1-score</strong>: 0.14</p></li>
+<li><p><strong>Weighted Accuracy</strong>: 0.30</p></li>
+<li><p><strong>Notable metrics</strong>:</p>
+<ul>
+<li><p>Michael: <strong>Recall 0.74</strong>, but F1: 0.44 means severe overfitting to this class</p></li>
+<li><p>Most other classes have <strong>very low recal</strong></p></li>
+</ul></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/confusion_matrix_NB_20250731_160926-01.png" class="img-fluid figure-img"></p>
+<figcaption>Picture 8. Confusion Matrix NB</figcaption>
+</figure>
+</div>
+<p>High true positives for Michael (1753) and Dwight (845), but poor performance for minority classes (e.g.&nbsp;Angela: 16, Darryl: 12), indicating bias toward frequent classes.</p>
+<p><strong>Analysis:</strong></p>
+<ul>
+<li><p><strong>Strengths</strong>: Very fast to train; good at recognizing <strong>frequent character-specific keywords</strong>.</p></li>
+<li><p><strong>Weaknesses</strong>: Strong bias toward the <strong>most frequent class</strong> (Michael), hurting balanced accuracy.</p></li>
+<li><p><strong>Insight</strong>: NB’s assumption of feature independence is overly simplistic for this dataset; it fails to generalize across more nuanced character expressions.</p></li>
+</ul>
+</section>
+<section id="random-fores-rf" class="level3">
+<h3 class="anchored" data-anchor-id="random-fores-rf">Random Fores (RF)</h3>
+<p><strong>Model Type</strong>: Ensemble of decision trees, with class weighting to reduce bias.</p>
+<p><strong>Best Params:</strong></p>
+<p><code>{'n_estimators': 200, 'min_samples_split': 2, 'min_samples_leaf': 2, 'max_depth': None}</code></p>
+<p><strong>Results:</strong></p>
+<ul>
+<li><p><strong>CV Balanced Accuracy</strong>: 0.1863</p></li>
+<li><p><strong>Test Balanced Accuracy</strong>: 0.1901</p></li>
+<li><p><strong>Macro F1-score</strong>: 0.17</p></li>
+<li><p><strong>Weighted Accuracy</strong>: 0.22</p></li>
+<li><p><strong>Moderate performance</strong> across many classes, with:</p>
+<ul>
+<li><p>Michael recall: 0.25</p></li>
+<li><p>Dwight, Jim: slightly better balanced metrics</p></li>
+</ul></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/confusion_matrix_RF_20250731_160926-01.png" class="img-fluid figure-img"></p>
+<figcaption>Picture 9. Confusion Matrix 9</figcaption>
+</figure>
+</div>
+<p>Michael (594) and Dwight (435) remain strong, with better overall balance (e.g.&nbsp;Andy 138, Kevin 38). Lower off-diagonal values (e.g.&nbsp;Jim 284 for Michael) suggest improved accuracy over NB and LR.</p>
+<p><strong>Analysis:</strong></p>
+<ul>
+<li><p><strong>Strengths</strong>: Captures <strong>non-linear patterns</strong>, improving performance on some minority classes compared to NB.</p></li>
+<li><p><strong>Weaknesses</strong>: Slower to train; slightly overfitting to frequent classes.</p></li>
+<li><p><strong>Insight</strong>: Despite being more flexible, RF doesn’t significantly outperform LR. Feature sparsity from TF-IDF might limit tree-based model performance.</p></li>
+</ul>
+</section>
+<section id="final-comparison-table" class="level3">
+<h3 class="anchored" data-anchor-id="final-comparison-table">Final Comparison Table</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 19%">
+<col style="width: 21%">
+<col style="width: 9%">
+<col style="width: 12%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>CV Balanced Accuracy</th>
+<th>Test Balanced Accuracy</th>
+<th>Macro F1</th>
+<th>Weighted Acc</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>LR</strong></td>
+<td>0.1975</td>
+<td><strong>0.2045</strong></td>
+<td>0.17</td>
+<td>0.20</td>
+<td>Best overall</td>
+</tr>
+<tr class="even">
+<td>NB</td>
+<td>0.1402</td>
+<td><p>0.1414</p>
+<p>0.1414</p></td>
+<td>0.14</td>
+<td>0.30</td>
+<td>Overfits frequent classes</td>
+</tr>
+<tr class="odd">
+<td>RF</td>
+<td>0.1863</td>
+<td><p>0.1901</p>
+<p>0.1880</p></td>
+<td>0.17</td>
+<td>0.22</td>
+<td>Balanced, slower</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Model performance is low overall</strong>: even best model (LR) achieves just 20% balanced accuracy, which is typical for <strong>multi-class text classification</strong> with many similar classes and high class imbalance.</p>
+</section>
+<section id="why-is-logistic-regression-the-best-model" class="level3">
+<h3 class="anchored" data-anchor-id="why-is-logistic-regression-the-best-model">Why is Logistic Regression the Best Model?</h3>
+<p>LR’s linear nature is computationally lightweight. Elasticnet balances feature selection and model complexity, crucial for sparse, high-dimensional text data. Also, consistent CV and test accuracy indicate robustness, despite class imbalance challenges. LR effectively captures linear relationships in TF-IDF features, sufficient for distinguishing speaker-specific dialogue patterns.</p>
+<p>RF’s non-linear modeling offers marginal improvements but is computationally intensive, while NB’s simplicity leads to overfitting on frequent classes. LR’s balance of performance and efficiency makes it optimal for NL exploration on limited hardware.</p>
+</section>
+<section id="potential-improvements" class="level3">
+<h3 class="anchored" data-anchor-id="potential-improvements">Potential Improvements</h3>
+<p><strong>Add more semantic features</strong> <strong>BERT Sentence Embeddings</strong>: TF-IDF treats words independently, missing contextual nuances. BERT embeddings capture semantic relationships, creating dense vectors that better distinguish speakers with similar vocabularies.</p>
+<p><strong>Dimensionality Reduction TruncatedSVD for sparse data</strong>: Reducing TF-IDF’s high-dimensional space with TruncatedSVD retains key signals, reduces noise, and improves generalization, particularly for linear models like LR.</p>
+<p><strong>Use stacked/ensemble models</strong>: Each model type sees the data differently. Stacking LR and RF, for example, lets one model correct the other’s weaknesses. It boosts predictive power by combining strengths (e.g.&nbsp;LR’s precision and RF’s non-linear depth).</p>
+<p><strong>Data augmentation (paraphrasing, synonym expansion)</strong>: Adds variability and balance by expanding training samples without collecting more data. Helps underrepresented classes generalize better, especially in text tasks.</p>
+</section>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
+<p>Logistic Regression outperformed Multinomial Naive Bayes and Random Forest due to its efficiency and robustness with sparse TF-IDF features, making it the optimal choice for this speaker prediction task. Traditional models like LR and RF provided baseline insights but struggled with class imbalance and capturing semantic nuances. Modern approaches, such as BERT embeddings, could better capture contextual relationships in dialogue, while techniques like data augmentation or class merging could address imbalance. Ensemble methods combining LR and RF may further enhance performance. These strategies, though computationally intensive, represent promising next steps for improving natural language classification in future iterations.</p>
+</section>
+<section id="literature" class="level2">
+<h2 class="anchored" data-anchor-id="literature">Literature</h2>
+<ol type="1">
+<li><a href="https://www.deeplearning.ai/resources/natural-language-processing/">A Complete Guide to Natural Language Processing</a></li>
+<li><a href="https://www.nltk.org/book/">Natural Language Processing with Python</a></li>
+<li><a href="https://towardsdatascience.com/">Towards Data Science website (various articles)</a></li>
+</ol>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
