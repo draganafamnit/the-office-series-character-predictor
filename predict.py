@@ -10,7 +10,6 @@ from sklearn.ensemble import RandomForestClassifier
 from datetime import datetime
 
 # Load the Vectorizer
-
 try:
     vectorizer = joblib.load("vectorizer.pkl")
 except FileNotFoundError:
@@ -18,7 +17,6 @@ except FileNotFoundError:
     exit(1)
 
 # Load the Latest Saved Best Model
-
 import glob
 model_files = sorted(glob.glob("best_model_*.pkl"), reverse=True)
 
@@ -31,14 +29,12 @@ model = joblib.load(model_path)
 print(f"Loaded model: {model_path}")
 
 # Function to Clean and Preprocess Input Text
-
 def clean_text(text):
     text = text.lower()
     text = re.sub(r"[^\w\s]", "", text)
     return text
 
 # Main Prediction Loop
-
 print("\nWelcome to The Office - Character Predictor!")
 print("Enter a sentence and the model will predict who is most likely to have said it.")
 print("Type 'exit' to quit.\n")
@@ -57,11 +53,9 @@ while True:
     probabilities = model.predict_proba(transformed)[0]
 
     # Display Result
-
     print(f"\nPredicted Character: **{prediction}**")
 
     # Show Top 3 Probabilities
-
     top3_idx = np.argsort(probabilities)[::-1][:3]
     top3_labels = model.classes_[top3_idx]
     top3_probs = probabilities[top3_idx]
