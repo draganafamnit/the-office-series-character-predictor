@@ -1,4 +1,5 @@
 # preprocess.py
+import os
 import pandas as pd
 import joblib
 from scipy.sparse import save_npz
@@ -31,5 +32,6 @@ y = data['Character']
 save_npz(os.path.join(output_folder, 'X_preprocessed.npz'), X)
 y.to_csv(os.path.join(output_folder, 'Y_preprocessed.csv.gz'), index=False, compression='gzip')
 joblib.dump(vectorizer, os.path.join(output_folder, 'vectorizer.pkl'))
+
 
 print("Preprocessing complete. Files saved in 'preprocessed/' folder.")
