@@ -14,15 +14,10 @@ https://www.kaggle.com/datasets/fabriziocominetti/the-office-lines
 
 
 ## How to Run
-Create new virtual environment, clone the repo, install requirements and run scripts
+Create new virtual environment, clone the repo, install requirements and then run scripts
 ```bash
 git clone https://github.com/draganafamnit/the-office-series-character-predictor.git
 pip install -r requirements.txt
-python preprocess.py
-python train.py
 ```
-## About
-The project was implemented in both Google Colab and VS Code due to local environment constraints. Multiple GitHub and syncing issues were encountered and solved manually. This workflow and setup will be described in detail in the final project report.
-
 ## Notes
 This repo does not include output files (e.g., trained models, reports, plots), as they will be described in a separate report document.
